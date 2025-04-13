@@ -6,12 +6,6 @@ from simple_linked_list import LinkedList, EmptyListException
 # No canonical data available for this exercise
 
 
-# PASSED hello-world/hello_world_test.py::HelloWorldTest::test_say_hi
-# PASSED simple-linked-list/simple_linked_list_test.py::SimpleLinkedListTest::test_error_on_empty_list_head
-# PASSED simple-linked-list/simple_linked_list_test.py::SimpleLinkedListTest::test_non_empty_list_has_correct_len
-# PASSED simple-linked-list/simple_linked_list_test.py::SimpleLinkedListTest::test_singleton_list_has_head
-# PASSED simple-linked-list/simple_linked_list_test.py::SimpleLinkedListTest::test_singleton_list_has_len_one
-# PASSED simple-linked-list/simple_linked_list_test.py::SimpleLinkedListTest::test_singleton_list_head_has_no_next
 class SimpleLinkedListTest(unittest.TestCase):
     def test_empty_list_has_len_zero(self):
         sut = LinkedList()

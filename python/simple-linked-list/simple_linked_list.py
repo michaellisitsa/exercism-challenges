@@ -1,5 +1,4 @@
 from __future__ import annotations
-import typing
 
 
 class EmptyListException(Exception):
@@ -8,7 +7,7 @@ class EmptyListException(Exception):
 
 
 class Node:
-    _next: typing.Optional[Node]
+    _next: Node | None
     _value: int
 
     def __init__(self, value: int):
@@ -18,12 +17,11 @@ class Node:
         """
         # Store the value
         self._value = value
-        pass
 
     def value(self) -> int:
         return self._value
 
-    def next(self) -> typing.Optional[Node]:
+    def next(self) -> Node | None:
         try:
             return self._next
         except:
@@ -51,7 +49,7 @@ class LinkedList:
         """
         length = 0
         try:
-            currentNode: typing.Optional[Node] = self.head()
+            currentNode: Node | None = self.head()
             length += 1
         except EmptyListException:
             # Do not throw an exception on accessing head.
@@ -94,7 +92,7 @@ class LinkedList:
             else:
                 # type error as we're resetting the head, and the current type doesn't allow this
                 self._head = None
-        except:
+        except AttributeError:
             return None
         return current_head.value()
 
