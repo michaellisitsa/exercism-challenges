@@ -31,7 +31,7 @@ class Node:
 
 
 class LinkedList:
-    _head: Node
+    _head: Node | None
 
     def __init__(self, values=None):
         if values is None:
@@ -84,7 +84,19 @@ class LinkedList:
         self._head = newHead
 
     def pop(self):
-        pass
+        try:
+            # This all seems very ugly
+            # Find a better way in python
+            current_head = self.head()
+            new_head = current_head.next()
+            if new_head:
+                self._head = new_head
+            else:
+                # type error as we're resetting the head, and the current type doesn't allow this
+                self._head = None
+        except:
+            return None
+        return current_head.value()
 
     def reversed(self):
         pass
