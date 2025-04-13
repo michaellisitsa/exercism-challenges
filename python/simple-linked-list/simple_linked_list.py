@@ -48,8 +48,8 @@ class LinkedList:
                 nextNode = current_node.next()
                 yield nextNode.value()
                 current_node = nextNode
-        except EmptyListException:
-            yield None
+        except (EmptyListException, AttributeError):
+            pass
 
     def __len__(self):
         """
@@ -57,7 +57,7 @@ class LinkedList:
         """
         length = 0
         try:
-            current_node: Node | None = self.head()
+            current_node: Node = self.head()
             length += 1
         except EmptyListException:
             # Do not throw an exception on accessing head.
@@ -94,15 +94,17 @@ class LinkedList:
             # This all seems very ugly
             # Find a better way in python
             current_head = self.head()
+            current_value = current_head.value()
             new_head = current_head.next()
             if new_head:
                 self._head = new_head
             else:
                 # type error as we're resetting the head, and the current type doesn't allow this
-                self._head = None
+                # Horrible hack because we don't want to set it to None, otherwise it won't error in the try blocks
+                del self._head
         except AttributeError:
             return None
-        return current_head.value()
+        return current_value
 
     def reversed(self):
         pass
