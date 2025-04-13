@@ -41,7 +41,15 @@ class LinkedList:
         """
         Supports looping through the list
         """
-        pass
+        try:
+            current_node = self.head()
+            yield current_node.value()
+            while current_node and current_node.next():
+                nextNode = current_node.next()
+                yield nextNode.value()
+                current_node = nextNode
+        except EmptyListException:
+            yield None
 
     def __len__(self):
         """
@@ -49,7 +57,7 @@ class LinkedList:
         """
         length = 0
         try:
-            currentNode: Node | None = self.head()
+            current_node: Node | None = self.head()
             length += 1
         except EmptyListException:
             # Do not throw an exception on accessing head.
@@ -57,10 +65,10 @@ class LinkedList:
             # as the LinkedList may be empty to start but filled with push
             return length
 
-        while currentNode and currentNode.next():
-            # Checking currentNode
+        while current_node and current_node.next():
+            # Checking current_node
             length += 1
-            currentNode = currentNode.next()
+            current_node = current_node.next()
         return length
 
     def head(self) -> Node:
