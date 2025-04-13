@@ -36,18 +36,8 @@ class LinkedList:
     def __init__(self, values=None):
         if values is None:
             return
-        previousNode = None
         for value in values:
-            node = Node(value)
-            print("calling node ", node, " with value ", value)
-            if previousNode:
-                print("previous node ", previousNode)
-                previousNode._next = node
-            else:
-                # We are on the first iteration.
-                # Let's save this to head
-                self._head = node
-            previousNode = node
+            self.push(value)
 
     def __iter__(self):
         """
@@ -71,12 +61,11 @@ class LinkedList:
 
         while currentNode and currentNode.next():
             # Checking currentNode
-            print("currentNode", currentNode)
             length += 1
             currentNode = currentNode.next()
         return length
 
-    def head(self) -> typing.Optional[Node]:
+    def head(self) -> Node:
         try:
             return self._head
         except:
@@ -85,11 +74,14 @@ class LinkedList:
     def push(self, value):
         """
         Push to the head of the linked list
-        Much easier than pushing to the back because you don't need
-        to navigate O(n) to the end.
+        If head doesn't exist we don't need to except
         """
         newHead = Node(value)
-        newHead._next = self.head()
+        try:
+            newHead._next = self.head()
+        except EmptyListException:
+            pass
+        self._head = newHead
 
     def pop(self):
         pass
