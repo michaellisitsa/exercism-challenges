@@ -52,11 +52,21 @@ class RestAPI:
             return json.dumps({"users": list(filtered_users)})
 
     def post(self, url, payload=None):
+        if payload is None:
+            return
+        payload_decoded = json.loads(payload)
         if url.endswith("add"):
-            if payload is None:
-                return
-            payload_decoded = json.loads(payload)
             # TODO: We need to make it easier to do a set, rather than every time grabbing the user id
             # and filtering over the list
             new_user = self.setData(payload_decoded["user"])
+        elif url.endswith("iou"):
+            # expected data shape =  {"lender":<name of lender>,"borrower":<name of borrower>,"amount":5.25}
+            borrower = self.fetchData(payload_decoded["borrower"])
+            lender = self.fetchData(payload_decoded["lender"])
+            # Decrement the balance of the lender, increment of the lender
+            borrower["balance"] -= payload_decoded["amount"]
+            lender["balance"] += payload_decoded["amount"]
+            # Find the lender in the list of in the borrower's owed list
+            borrower_currently_owes_lender_amt = borrower["owes"][lender["name"]]
+            borrower_currently_owes_lender_amt += payload_decoded["amount"]
         return json.dumps(new_user)
