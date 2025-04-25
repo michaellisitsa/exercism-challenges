@@ -2,10 +2,11 @@
 # https://github.com/exercism/problem-specifications/tree/main/exercises/rest-api/canonical-data.json
 # File last updated on 2023-07-19
 
+from dataclasses import asdict
 import json
 import unittest
 
-from rest_api import RestAPI, User
+from rest_api import RestAPI, User, Database
 
 
 class UserTest(unittest.TestCase):
@@ -14,6 +15,22 @@ class UserTest(unittest.TestCase):
         self.assertEqual(user.name, "John Smith")
         self.assertDictEqual(user.owes, {"mary": 10, "karl": 20})
         self.assertDictEqual(user.owed_by, {})
+
+
+class DatabaseTest(unittest.TestCase):
+    def test_add_missing_user_key(self):
+        user = User("John Smith", {"mary": 10, "karl": 20}, {}, 10)
+        db = Database()
+        db[user.name] = user
+        self.assertDictEqual(
+            asdict(db[user.name]),
+            {
+                "name": "John Smith",
+                "owes": {"mary": 10, "karl": 20},
+                "owed_by": {},
+                "balance": 10,
+            },
+        )
 
 
 class RestApiTest(unittest.TestCase):

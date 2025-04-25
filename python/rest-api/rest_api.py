@@ -1,3 +1,4 @@
+from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 
@@ -11,6 +12,12 @@ class User:
 
     def to_string(self) -> str:
         return f"{self.name}- owes: {self.owes} and is owed by {self.owed_by} with balance {self.balance}"
+
+
+class Database(dict):
+    def __missing__(self, name) -> User:
+        self[name] = User(name)
+        return self[name]
 
 
 class RestAPI:
