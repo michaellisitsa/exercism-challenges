@@ -1,4 +1,16 @@
 import json
+from dataclasses import dataclass, field
+
+
+@dataclass
+class User:
+    name: str
+    owes: dict[str, float] = field(default_factory=dict)
+    owed_by: dict[str, float] = field(default_factory=dict)
+    balance: float = 0
+
+    def to_string(self) -> str:
+        return f"{self.name}- owes: {self.owes} and is owed by {self.owed_by} with balance {self.balance}"
 
 
 class RestAPI:

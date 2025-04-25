@@ -5,9 +5,15 @@
 import json
 import unittest
 
-from rest_api import (
-    RestAPI,
-)
+from rest_api import RestAPI, User
+
+
+class UserTest(unittest.TestCase):
+    def test_initial_user_created(self):
+        user = User("John Smith", {"mary": 10, "karl": 20}, {}, 10)
+        self.assertEqual(user.name, "John Smith")
+        self.assertDictEqual(user.owes, {"mary": 10, "karl": 20})
+        self.assertDictEqual(user.owed_by, {})
 
 
 class RestApiTest(unittest.TestCase):
