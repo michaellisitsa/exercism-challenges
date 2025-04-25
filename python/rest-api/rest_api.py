@@ -11,7 +11,10 @@ class RestAPI:
         ]
         """
         # TODO: Do I need to normalize the data, or just have getters for different things like amount
-        self._data = database
+        if database is None:
+            self._data = {"users": []}
+        else:
+            self._data = database
 
         # TODO: Rename to better method
 
@@ -29,13 +32,31 @@ class RestAPI:
                 break
         return user
 
+    def setData(self, userId) -> None:
+        user = self.fetchData(userId)
+        if not user:
+            user = {"name": userId, "owes": {}, "owed_by": {}, "balance": 0}
+            self._data["users"].append(user)
+            return user
+
     def get(self, url, payload=None):
         """
         payload = {"users":["Adam","Bob"]}
         """
         if payload is None:
             return json.dumps(self._data)
+        # TODO: Add a decorator to decode and encode. This is is getting old
         payload_decoded = json.loads(payload)
         if url.endswith("users"):
             filtered_users = map(self.fetchData, payload_decoded["users"])
             return json.dumps({"users": list(filtered_users)})
+
+    def post(self, url, payload=None):
+        if url.endswith("add"):
+            if payload is None:
+                return
+            payload_decoded = json.loads(payload)
+            # TODO: We need to make it easier to do a set, rather than every time grabbing the user id
+            # and filtering over the list
+            new_user = self.setData(payload_decoded["user"])
+        return json.dumps(new_user)
