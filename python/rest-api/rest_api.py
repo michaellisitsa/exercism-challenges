@@ -21,6 +21,8 @@ class Database(dict):
 
 
 class RestAPI:
+    _data: Database
+
     # TODO: how to type a dict with specific key "users" and list of dict
     def __init__(self, database: dict | None = None):
         """
@@ -30,12 +32,23 @@ class RestAPI:
         ]
         """
         # TODO: Do I need to normalize the data, or just have getters for different things like amount
-        if database is None:
-            self._data = {"users": []}
-        else:
-            self._data = database
+        self._data = Database()
+        if database:
+            for user in database["users"]:
+                self.set_user(user)
 
-        # TODO: Rename to better method
+    def set_user(self, data):
+        # Only name is required by the User class
+        user = User(
+            data["name"],
+            data["owes"],
+            data["owed_by"],
+            data["balance"],
+        )
+        self._data[user.name] = user
+
+    def get_user(self, name):
+        return self._data[name]
 
     def fetchData(self, userId) -> dict | None:
         # TODO: Get a better find function
