@@ -1,6 +1,7 @@
 from __future__ import annotations
 import json
 from dataclasses import dataclass, field
+from typing import TypedDict
 
 
 @dataclass
@@ -14,6 +15,17 @@ class User:
         return f"{self.name}- owes: {self.owes} and is owed by {self.owed_by} with balance {self.balance}"
 
 
+class UserDict(TypedDict):
+    name: str
+    owes: dict[str, float]
+    owed_by: dict[str, float]
+    balance: float
+
+
+class DatabaseDict(TypedDict):
+    users: list[UserDict]
+
+
 class Database(dict):
     def __missing__(self, name) -> User:
         self[name] = User(name)
@@ -24,7 +36,7 @@ class RestAPI:
     _data: Database
 
     # TODO: how to type a dict with specific key "users" and list of dict
-    def __init__(self, database: dict | None = None):
+    def __init__(self, database: DatabaseDict | None = None):
         """
         Ingest database with users like below
         "users": [
