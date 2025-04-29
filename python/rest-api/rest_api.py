@@ -35,11 +35,12 @@ class Database(dict):
 
 
 def json_serializer(func):
+    @wraps(func)
     def wrapper(self, url, payload=None):
         serialized_payload = None
         if payload is not None:
             serialized_payload = json.loads(payload)
-        return func(self, url, serialized_payload)
+        return json.dumps(func(self, url, serialized_payload))
 
     return wrapper
 
@@ -97,7 +98,7 @@ class RestAPI:
                 return {"users": self.get_users()}
             else:
                 users = [asdict(self.get_user(user)) for user in payload["users"]]
-                return json.dumps({"users": users})
+                return {"users": users}
 
     def post(self, url, payload=None):
         if payload is None:
