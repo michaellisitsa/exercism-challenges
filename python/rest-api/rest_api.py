@@ -28,7 +28,7 @@ class DatabaseDict(TypedDict):
     users: list[UserDict]
 
 
-class Database(dict):
+class Database(dict[str, User]):
     def __missing__(self, name) -> User:
         self[name] = User(name)
         return self[name]
@@ -82,7 +82,7 @@ class RestAPI:
             for user in database["users"]:
                 self.set_user(user)
 
-    def set_user(self, data):
+    def set_user(self, data: UserDict) -> User:
         # Only name is requred by the User class
         user = User(
             data["name"],
@@ -93,10 +93,10 @@ class RestAPI:
         self._data[user.name] = user
         return user
 
-    def get_user(self, name):
+    def get_user(self, name: str) -> User:
         return self._data[name]
 
-    def get_users(self):
+    def get_users(self) -> list[dict[str, User]]:
         return [asdict(user) for user in self._data.values()]
 
     def fetchData(self, userId) -> dict | None:
