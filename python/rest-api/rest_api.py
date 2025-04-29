@@ -1,4 +1,6 @@
-from __future__ import annotations
+from __future__ import annotations  # must be at top of file
+
+from functools import wraps
 import json
 from dataclasses import dataclass, field, asdict
 from typing import TypedDict
@@ -32,10 +34,19 @@ class Database(dict):
         return self[name]
 
 
+def json_serializer(func):
+    def wrapper(self, url, payload=None):
+        serialized_payload = None
+        if payload is not None:
+            serialized_payload = json.loads(payload)
+        return func(self, url, serialized_payload)
+
+    return wrapper
+
+
 class RestAPI:
     _data: Database
 
-    # TODO: how to type a dict with specific key "users" and list of dict
     def __init__(self, database: DatabaseDict | None = None):
         self._data = Database()
         if database:
@@ -79,14 +90,13 @@ class RestAPI:
             self._data["users"].append(user)
             return user
 
+    @json_serializer
     def get(self, url, payload=None):
         if url.endswith("users"):
             if payload is None:
-                return json.dumps({"users": self.get_users()})
+                return {"users": self.get_users()}
             else:
-                users = [
-                    asdict(self.get_user(user)) for user in json.loads(payload)["users"]
-                ]
+                users = [asdict(self.get_user(user)) for user in payload["users"]]
                 return json.dumps({"users": users})
 
     def post(self, url, payload=None):
