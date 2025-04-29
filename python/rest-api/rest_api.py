@@ -63,6 +63,7 @@ class RestAPI:
             data["balance"],
         )
         self._data[user.name] = user
+        return user
 
     def get_user(self, name):
         return self._data[name]
@@ -100,22 +101,27 @@ class RestAPI:
                 users = [asdict(self.get_user(user)) for user in payload["users"]]
                 return {"users": users}
 
-    def post(self, url, payload=None):
-        if payload is None:
-            return
-        payload_decoded = json.loads(payload)
+    @json_serializer
+    def post(self, url, payload):
         if url.endswith("add"):
             # TODO: We need to make it easier to do a set, rather than every time grabbing the user id
             # and filtering over the list
-            new_user = self.setData(payload_decoded["user"])
+            new_user = self.set_user(
+                {
+                    "name": payload["user"],
+                    "owes": {},
+                    "owed_by": {},
+                    "balance": 0,
+                }
+            )
+            return asdict(new_user)
         elif url.endswith("iou"):
             # expected data shape =  {"lender":<name of lender>,"borrower":<name of borrower>,"amount":5.25}
-            borrower = self.fetchData(payload_decoded["borrower"])
-            lender = self.fetchData(payload_decoded["lender"])
+            borrower = self.fetchData(payload["borrower"])
+            lender = self.fetchData(payload["lender"])
             # Decrement the balance of the lender, increment of the lender
-            borrower["balance"] -= payload_decoded["amount"]
-            lender["balance"] += payload_decoded["amount"]
+            borrower["balance"] -= payload["amount"]
+            lender["balance"] += payload["amount"]
             # Find the lender in the list of in the borrower's owed list
             borrower_currently_owes_lender_amt = borrower["owes"][lender["name"]]
-            borrower_currently_owes_lender_amt += payload_decoded["amount"]
-        return json.dumps(new_user)
+            borrower_currently_owes_lender_amt += payload["amount"]
