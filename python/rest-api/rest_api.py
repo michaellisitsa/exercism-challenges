@@ -3,7 +3,7 @@ from __future__ import annotations  # must be at top of file
 from functools import wraps
 import json
 from dataclasses import dataclass, field, asdict
-from typing import TypedDict
+from typing import TypeGuard, TypedDict, assert_type, cast
 
 
 @dataclass
@@ -32,6 +32,34 @@ class Database(dict):
     def __missing__(self, name) -> User:
         self[name] = User(name)
         return self[name]
+
+
+class IOUPayloadT(TypedDict):
+    lender: str
+    borrower: str
+    amount: float
+
+
+class AddPayloadT(TypedDict):
+    user: str
+
+
+def is_add_payload(x: object) -> TypeGuard[AddPayloadT]:
+    return (
+        isinstance(x, dict)
+        and all(isinstance(key, str) for key in x)
+        and "user" in x
+        and isinstance(x["user"], str)
+    )
+
+
+def is_iou_payload(x: object) -> TypeGuard[IOUPayloadT]:
+    return (
+        isinstance(x, dict)
+        and all(isinstance(key, str) for key in x)
+        and "lender" in x
+        and isinstance(x["lender"], str)
+    )
 
 
 def json_serializer(func):
@@ -102,21 +130,19 @@ class RestAPI:
                 return {"users": users}
 
     @json_serializer
-    def post(self, url, payload):
-        if url.endswith("add"):
-            # TODO: We need to make it easier to do a set, rather than every time grabbing the user id
-            # and filtering over the list
-            new_user = self.set_user(
-                {
-                    "name": payload["user"],
-                    "owes": {},
-                    "owed_by": {},
-                    "balance": 0,
-                }
+    def post(self, url: str, payload: IOUPayloadT | AddPayloadT):
+        if url.endswith("add") and is_add_payload(payload):
+            return asdict(
+                self.set_user(
+                    {
+                        "name": payload["user"],
+                        "owes": {},
+                        "owed_by": {},
+                        "balance": 0,
+                    }
+                )
             )
-            return asdict(new_user)
-        elif url.endswith("iou"):
-            # expected data shape =  {"lender":<name of lender>,"borrower":<name of borrower>,"amount":5.25}
+        elif url.endswith("iou") and is_iou_payload(payload):
             borrower = self.fetchData(payload["borrower"])
             lender = self.fetchData(payload["lender"])
             # Decrement the balance of the lender, increment of the lender
