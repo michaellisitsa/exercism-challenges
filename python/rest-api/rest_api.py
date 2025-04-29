@@ -143,11 +143,13 @@ class RestAPI:
                 )
             )
         elif url.endswith("iou") and is_iou_payload(payload):
-            borrower = self.fetchData(payload["borrower"])
-            lender = self.fetchData(payload["lender"])
+            amount = payload["amount"]
+            borrower = self.get_user(payload["borrower"])
+            lender = self.get_user(payload["lender"])
             # Decrement the balance of the lender, increment of the lender
-            borrower["balance"] -= payload["amount"]
-            lender["balance"] += payload["amount"]
-            # Find the lender in the list of in the borrower's owed list
-            borrower_currently_owes_lender_amt = borrower["owes"][lender["name"]]
-            borrower_currently_owes_lender_amt += payload["amount"]
+            borrower.balance -= amount
+            lender.balance += amount
+            # TODO: Append to existing balance
+            borrower.owes[lender.name] = amount
+            lender.owed_by[borrower.name] = amount
+            return {"users": [asdict(lender), asdict(borrower)]}
