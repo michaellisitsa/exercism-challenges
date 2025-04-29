@@ -1,5 +1,5 @@
 from __future__ import annotations  # must be at top of file
-
+import math
 from functools import wraps
 import json
 from dataclasses import dataclass, field, asdict
@@ -131,6 +131,13 @@ class RestAPI:
 
     @json_serializer
     def post(self, url: str, payload: IOUPayloadT | AddPayloadT):
+        def sorted_users(lender, borrower):
+            return sorted(
+                # We could make this more generic with *args, but unnecessary atm
+                [asdict(lender), asdict(borrower)],
+                key=lambda user: user["name"],
+            )
+
         if url.endswith("add") and is_add_payload(payload):
             return asdict(
                 self.set_user(
@@ -149,7 +156,30 @@ class RestAPI:
             # Decrement the balance of the lender, increment of the lender
             borrower.balance -= amount
             lender.balance += amount
-            # TODO: Append to existing balance
-            borrower.owes[lender.name] = amount
-            lender.owed_by[borrower.name] = amount
-            return {"users": [asdict(lender), asdict(borrower)]}
+
+            borrower_owed = borrower.owed_by.get(lender.name) or 0
+            paid_down_owed = 0
+            if borrower_owed:
+                paid_down_owed = min(borrower_owed, amount)
+                borrower.owed_by[lender.name] -= paid_down_owed
+                if borrower.owed_by[lender.name] == 0:
+                    del borrower.owed_by[lender.name]
+            borrower.owes[lender.name] = (
+                amount + (borrower.owes.get(lender.name) or 0) - paid_down_owed
+            )
+            if borrower.owes[lender.name] == 0:
+                del borrower.owes[lender.name]
+            lender_owes = lender.owes.get(borrower.name) or 0
+            paid_down_owes = 0
+            if lender_owes:
+                paid_down_owes = min(lender_owes, amount)
+                lender.owes[borrower.name] -= paid_down_owes
+                if lender.owes[borrower.name] == 0:
+                    del lender.owes[borrower.name]
+            lender.owed_by[borrower.name] = (
+                amount + (lender.owed_by.get(borrower.name) or 0) - paid_down_owes
+            )
+            if lender.owed_by[borrower.name] == 0:
+                del lender.owed_by[borrower.name]
+
+            return {"users": sorted_users(lender, borrower)}

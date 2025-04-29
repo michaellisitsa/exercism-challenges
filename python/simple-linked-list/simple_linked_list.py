@@ -107,11 +107,4 @@ class LinkedList:
         return current_value
 
     def reversed(self):
-        pass
-
-
-# Given a range of numbers
-list = LinkedList([1, 2, 3, 4, 5])
-len(list)
-# Expect a linked list for each number
-#
+        return LinkedList(list(self))
