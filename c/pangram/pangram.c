@@ -5,7 +5,6 @@
 #include <string.h>
 
 bool is_pangram(const char *sentence) {
-  // int count = sizeof(*sentence) / sizeof(sentence[0]);
   if (sentence == NULL) {
     return false;
   } else if (sentence[0] == '\0') {
