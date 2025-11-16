@@ -47,6 +47,7 @@ CMakeUserPresets.json
 # test folder has large c and h files for the Unity library
 */test-framework/
 */tests.out.dSYM/
+*/memcheck.out.dSYM/
 
 # Exercism stuff
 */.exercism/
